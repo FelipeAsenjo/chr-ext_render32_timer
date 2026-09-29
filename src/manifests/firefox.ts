@@ -11,7 +11,7 @@ export default function createFirefoxManifest(): ExtensionManifest {
     background,
     browser_specific_settings: {
       gecko: {
-        id: 'extension@example.com',
+        id: 'render32_timer@example.com',
         strict_min_version: '121.0',
       },
     },

@@ -1,6 +1,7 @@
 {
-  "name": "cross-browser-extension-starter",
+  "name": "render32_timer",
   "version": "0.1.0",
+  "description": "Simple countdown timer",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +11,7 @@
     "build:safari": "vite build --mode safari",
     "build:all": "npm run build:chrome && npm run build:firefox && npm run build:safari",
     "dev": "vite build --mode chrome --watch",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",

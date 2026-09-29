@@ -8,7 +8,3 @@ export interface StoragePort {
   get<T>(key: string): Promise<T | undefined>;
   set<T>(key: string, value: T): Promise<void>;
 }
-
-export const STORAGE_KEYS = {
-  enabled: 'enabled',
-} as const;

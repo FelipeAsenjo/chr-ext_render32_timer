@@ -12,14 +12,8 @@ export interface ExtensionManifest {
     readonly service_worker?: string;
     readonly type?: 'module';
   };
-  readonly options_page: string;
   readonly permissions: readonly string[];
   readonly host_permissions: readonly string[];
-  readonly content_scripts: readonly {
-    readonly matches: readonly string[];
-    readonly js: readonly string[];
-    readonly run_at: 'document_idle';
-  }[];
   readonly icons: Readonly<Record<number, string>>;
   readonly browser_specific_settings?: {
     readonly gecko: {
@@ -32,28 +26,20 @@ export interface ExtensionManifest {
 export function createBaseManifest(): ExtensionManifest {
   return {
     manifest_version: 3,
-    name: 'Cross-Browser Extension Starter',
+    name: 'render32_timer',
     version: '0.1.0',
-    description: 'A small, modern starting point for cross-browser extensions.',
+    description: 'Simple countdown timer',
     action: {
       default_popup: 'src/popup/popup.html',
-      default_title: 'Cross-Browser Extension Starter',
+      default_title: 'render32_timer',
     },
     background: {
       scripts: ['src/composition/background.ts'],
       service_worker: 'src/composition/background.ts',
       type: 'module',
     },
-    options_page: 'src/options/options.html',
-    permissions: ['storage'],
+    permissions: ['storage', 'alarms'],
     host_permissions: [],
-    content_scripts: [
-      {
-        matches: ['https://example.com/*'],
-        js: ['src/content/content.ts'],
-        run_at: 'document_idle',
-      },
-    ],
     icons: {
       16: 'icons/icon-16.svg',
       48: 'icons/icon-48.svg',

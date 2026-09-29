@@ -33,33 +33,3 @@ h1 {
   font-size: 13px;
   line-height: 1.5;
 }
-
-.switch-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 22px 0 18px;
-  font-size: 13px;
-  font-weight: 650;
-}
-
-input {
-  accent-color: #35724a;
-}
-
-a {
-  color: #35724a;
-  font-size: 12px;
-  font-weight: 650;
-}
-
-.status {
-  min-height: 16px;
-  margin: 14px 0 0;
-  color: #35724a;
-  font-size: 11px;
-}
-
-.status.error {
-  color: #a23a36;
-}
