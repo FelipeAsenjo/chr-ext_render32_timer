@@ -7,12 +7,36 @@
     <link rel="stylesheet" href="./popup.css" />
   </head>
   <body>
-    <main class="card">
-      <p class="eyebrow">render32_timer</p>
-      <h1>Simple countdown timer.</h1>
-      <p class="description">
-        The timer interface is being built on the Chrome extension foundation.
-      </p>
+    <main class="timer-card">
+      <header class="header">
+        <p class="eyebrow">render32_timer</p>
+        <p id="state" class="state" aria-live="polite">Ready</p>
+      </header>
+
+      <section class="display-panel" aria-label="Timer">
+        <p id="countdown" class="countdown" aria-live="polite">45:00</p>
+        <p id="selected-duration" class="selected-duration">45 minutes selected</p>
+      </section>
+
+      <div class="primary-actions">
+        <button id="start-pause" class="primary-button" type="button">Start</button>
+        <button id="refresh" class="secondary-button" type="button">Refresh</button>
+      </div>
+
+      <section class="duration-section" aria-labelledby="quick-access-title">
+        <div class="section-heading">
+          <h1 id="quick-access-title">Quick access</h1>
+          <span>minutes</span>
+        </div>
+        <div id="quick-access" class="quick-grid"></div>
+      </section>
+
+      <label class="custom-duration" for="custom-duration">
+        <span>Custom duration</span>
+        <select id="custom-duration"></select>
+      </label>
+
+      <p id="status" class="status" role="status"></p>
     </main>
     <script type="module" src="./popup.ts"></script>
   </body>

@@ -1,35 +1,180 @@
 :root {
-  color: #17211b;
-  background: #f4f7f2;
+  color: #f4f0e8;
+  background: #131516;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  width: 300px;
+  width: 340px;
   margin: 0;
 }
 
-.card {
-  padding: 24px;
+button,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.timer-card {
+  padding: 22px;
+}
+
+.header,
+.section-heading,
+.custom-duration {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .eyebrow {
-  margin: 0 0 12px;
-  color: #35724a;
+  margin: 0;
+  color: #d6a24a;
   font-size: 11px;
   font-weight: 750;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-h1 {
+.state {
   margin: 0;
-  font-size: 25px;
-  letter-spacing: -0.04em;
+  color: #9da39e;
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
 }
 
-.description {
-  color: #5c6860;
-  font-size: 13px;
-  line-height: 1.5;
+.display-panel {
+  padding: 28px 0 24px;
+  text-align: center;
+}
+
+.countdown {
+  margin: 0;
+  color: #fff9ed;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 56px;
+  font-weight: 500;
+  letter-spacing: -0.08em;
+  line-height: 1;
+}
+
+.selected-duration {
+  margin: 12px 0 0;
+  color: #9da39e;
+  font-size: 12px;
+}
+
+.primary-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.primary-button,
+.secondary-button,
+.quick-button {
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-weight: 700;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.primary-button,
+.secondary-button {
+  padding: 11px 12px;
+}
+
+.primary-button {
+  color: #17130e;
+  background: #e5ae53;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #f2c16b;
+}
+
+.secondary-button {
+  color: #f4f0e8;
+  background: #25292a;
+  border-color: #3a3f3e;
+}
+
+.secondary-button:hover:not(:disabled),
+.quick-button:hover:not(:disabled) {
+  border-color: #d6a24a;
+}
+
+.duration-section {
+  margin-top: 25px;
+}
+
+.section-heading {
+  margin-bottom: 9px;
+}
+
+.section-heading h1 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+}
+
+.section-heading span {
+  color: #737b76;
+  font-size: 11px;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+.quick-button {
+  padding: 9px 4px;
+  color: #d9ddd8;
+  background: #1d2021;
+  border-color: #323737;
+  font-size: 12px;
+}
+
+.custom-duration {
+  margin-top: 18px;
+  color: #d9ddd8;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+select {
+  min-width: 105px;
+  padding: 7px 8px;
+  color: #f4f0e8;
+  background: #1d2021;
+  border: 1px solid #3a3f3e;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.status {
+  min-height: 15px;
+  margin: 13px 0 0;
+  color: #9da39e;
+  font-size: 11px;
+  text-align: center;
+}
+
+.status.error {
+  color: #ef8b78;
 }

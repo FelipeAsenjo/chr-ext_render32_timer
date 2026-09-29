@@ -1,4 +1,4 @@
-import type { TimerSnapshot } from '../timer/timer-model';
+import { isTimerSnapshot, type TimerSnapshot } from '../timer/timer-model';
 
 /** Messages accepted by the background application boundary. */
 export const MESSAGE_TYPES = {
@@ -47,4 +47,16 @@ export function isExtensionMessage(value: unknown): value is ExtensionMessage {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
+}
+
+export function isExtensionResponse(value: unknown): value is ExtensionResponse {
+  if (!isRecord(value) || typeof value.ok !== 'boolean') {
+    return false;
+  }
+
+  if (value.ok) {
+    return isTimerSnapshot(value.snapshot);
+  }
+
+  return typeof value.message === 'string';
 }
