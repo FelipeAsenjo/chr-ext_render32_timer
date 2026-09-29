@@ -17,6 +17,7 @@ export interface TimerService {
   start(): Promise<TimerSnapshot>;
   pause(): Promise<TimerSnapshot>;
   refresh(): Promise<TimerSnapshot>;
+  selectDuration(durationMinutes: number): Promise<TimerSnapshot>;
   selectAndStart(durationMinutes: number): Promise<TimerSnapshot>;
   cancelCompletion(): Promise<TimerSnapshot>;
   restart(durationMinutes: number): Promise<TimerSnapshot>;
@@ -141,6 +142,22 @@ export function createTimerService({
         state: TIMER_STATES.running,
         endAtMs: clock.now() + current.selectedDurationMs,
         remainingMs: null,
+      });
+    },
+
+    async selectDuration(durationMinutes: number): Promise<TimerSnapshot> {
+      const current = await ensureLoaded();
+
+      if (current.state === TIMER_STATES.running || current.state === TIMER_STATES.completed) {
+        return current;
+      }
+
+      const selectedDurationMs = durationMinutesToMilliseconds(durationMinutes);
+
+      return persist({
+        ...current,
+        selectedDurationMs,
+        remainingMs: current.state === TIMER_STATES.paused ? selectedDurationMs : null,
       });
     },
 

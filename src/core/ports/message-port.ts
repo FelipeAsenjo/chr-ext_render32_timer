@@ -6,6 +6,7 @@ export const MESSAGE_TYPES = {
   start: 'START_TIMER',
   pause: 'PAUSE_TIMER',
   refresh: 'REFRESH_TIMER',
+  selectDuration: 'SELECT_TIMER_DURATION',
   selectAndStart: 'SELECT_AND_START_TIMER',
   cancelCompletion: 'CANCEL_COMPLETION',
   restart: 'RESTART_TIMER',
@@ -16,6 +17,7 @@ export type ExtensionMessage =
   | { readonly type: typeof MESSAGE_TYPES.start }
   | { readonly type: typeof MESSAGE_TYPES.pause }
   | { readonly type: typeof MESSAGE_TYPES.refresh }
+  | { readonly type: typeof MESSAGE_TYPES.selectDuration; readonly durationMinutes: number }
   | { readonly type: typeof MESSAGE_TYPES.selectAndStart; readonly durationMinutes: number }
   | { readonly type: typeof MESSAGE_TYPES.cancelCompletion }
   | { readonly type: typeof MESSAGE_TYPES.restart; readonly durationMinutes: number };
@@ -40,7 +42,9 @@ export function isExtensionMessage(value: unknown): value is ExtensionMessage {
   }
 
   return (
-    (value.type === MESSAGE_TYPES.selectAndStart || value.type === MESSAGE_TYPES.restart) &&
+    (value.type === MESSAGE_TYPES.selectDuration ||
+      value.type === MESSAGE_TYPES.selectAndStart ||
+      value.type === MESSAGE_TYPES.restart) &&
     typeof value.durationMinutes === 'number'
   );
 }

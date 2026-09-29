@@ -86,6 +86,10 @@ async function dispatchMessage(message: ExtensionMessage) {
     return timerService.refresh();
   }
 
+  if (message.type === MESSAGE_TYPES.selectDuration) {
+    return timerService.selectDuration(message.durationMinutes);
+  }
+
   if (message.type === MESSAGE_TYPES.selectAndStart) {
     return timerService.selectAndStart(message.durationMinutes);
   }

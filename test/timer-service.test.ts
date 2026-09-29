@@ -87,6 +87,34 @@ describe('timer service', () => {
     expect(refreshed.endAtMs).toBe(clock.now() + durationMinutesToMilliseconds(10));
   });
 
+  it('selects a custom duration without starting from idle', async () => {
+    const { service } = createService();
+
+    const selected = await service.selectDuration(23);
+
+    expect(selected).toEqual({
+      state: TIMER_STATES.idle,
+      selectedDurationMs: durationMinutesToMilliseconds(23),
+      endAtMs: null,
+      remainingMs: null,
+    });
+  });
+
+  it('replaces a paused duration and starts the new selection from zero', async () => {
+    const { service, clock } = createService();
+
+    await service.selectAndStart(10);
+    clock.advance(30_000);
+    await service.pause();
+
+    const selected = await service.selectDuration(23);
+    expect(selected.state).toBe(TIMER_STATES.paused);
+    expect(selected.remainingMs).toBe(durationMinutesToMilliseconds(23));
+
+    const started = await service.start();
+    expect(started.endAtMs).toBe(clock.now() + durationMinutesToMilliseconds(23));
+  });
+
   it('reconciles an elapsed running timer as completed', async () => {
     const { service, clock } = createService();
 
