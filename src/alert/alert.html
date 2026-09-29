@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Timer complete | render32_timer</title>
+    <link rel="stylesheet" href="./alert.css" />
+  </head>
+  <body>
+    <main class="alert-card">
+      <p class="eyebrow">render32_timer</p>
+      <div class="alarm-mark" aria-hidden="true">!</div>
+      <h1>Time is up.</h1>
+      <p id="description" class="description">Your countdown is complete.</p>
+
+      <section id="restart-panel" class="restart-panel" hidden>
+        <label for="restart-duration">Restart with</label>
+        <select id="restart-duration"></select>
+        <div id="restart-quick-access" class="quick-grid"></div>
+      </section>
+
+      <div class="actions">
+        <button id="cancel" class="secondary-button" type="button">Cancel</button>
+        <button id="restart" class="primary-button" type="button">Restart</button>
+        <button id="confirm-restart" class="primary-button" type="button" hidden>
+          Start timer
+        </button>
+      </div>
+      <p id="status" class="status" role="status"></p>
+    </main>
+    <script type="module" src="./alert.ts"></script>
+  </body>
+</html>

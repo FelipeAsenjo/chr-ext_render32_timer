@@ -1,0 +1,223 @@
+import { extensionClient } from '../composition/extension-client';
+import {
+  isExtensionResponse,
+  MESSAGE_TYPES,
+  type ExtensionMessage,
+  type ExtensionResponse,
+} from '../core/ports/message-port';
+import {
+  MAX_DURATION_MINUTES,
+  MIN_DURATION_MINUTES,
+  QUICK_ACCESS_MINUTES,
+  type TimerSnapshot,
+} from '../core/timer/timer-model';
+
+const description = document.querySelector<HTMLParagraphElement>('#description');
+const restartPanel = document.querySelector<HTMLElement>('#restart-panel');
+const restartDuration = document.querySelector<HTMLSelectElement>('#restart-duration');
+const restartQuickAccess = document.querySelector<HTMLDivElement>('#restart-quick-access');
+const cancelButton = document.querySelector<HTMLButtonElement>('#cancel');
+const restartButton = document.querySelector<HTMLButtonElement>('#restart');
+const confirmRestartButton = document.querySelector<HTMLButtonElement>('#confirm-restart');
+const status = document.querySelector<HTMLParagraphElement>('#status');
+
+if (
+  !description ||
+  !restartPanel ||
+  !restartDuration ||
+  !restartQuickAccess ||
+  !cancelButton ||
+  !restartButton ||
+  !confirmRestartButton ||
+  !status
+) {
+  throw new Error('Alert markup is missing the required controls.');
+}
+
+const descriptionElement = description;
+const restartPanelElement = restartPanel;
+const restartDurationElement = restartDuration;
+const restartQuickAccessElement = restartQuickAccess;
+const cancelButtonElement = cancelButton;
+const restartButtonElement = restartButton;
+const confirmRestartButtonElement = confirmRestartButton;
+const statusElement = status;
+
+let selectedRestartMinutes = 45;
+let alarmContext: AudioContext | undefined;
+let alarmInterval: number | undefined;
+let alarmTimeout: number | undefined;
+
+function showStatus(message: string, isError = false): void {
+  statusElement.textContent = message;
+  statusElement.classList.toggle('error', isError);
+}
+
+function createDurationOptions(): void {
+  for (let minutes = MIN_DURATION_MINUTES; minutes <= MAX_DURATION_MINUTES; minutes += 1) {
+    const option = document.createElement('option');
+    option.value = String(minutes);
+    option.textContent = `${minutes} minutes`;
+    restartDurationElement.append(option);
+  }
+}
+
+function createQuickAccessButtons(): void {
+  for (const minutes of QUICK_ACCESS_MINUTES) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.minutes = String(minutes);
+    button.textContent = String(minutes);
+    restartQuickAccessElement.append(button);
+  }
+}
+
+function setSelectedRestartMinutes(minutes: number): void {
+  selectedRestartMinutes = minutes;
+  restartDurationElement.value = String(minutes);
+}
+
+function startTone(): void {
+  if (!alarmContext) {
+    return;
+  }
+
+  const oscillator = alarmContext.createOscillator();
+  const gain = alarmContext.createGain();
+  oscillator.frequency.value = 880;
+  oscillator.type = 'square';
+  gain.gain.setValueAtTime(0.035, alarmContext.currentTime);
+  oscillator.connect(gain);
+  gain.connect(alarmContext.destination);
+  oscillator.start();
+  oscillator.stop(alarmContext.currentTime + 0.22);
+}
+
+function stopAlarm(): void {
+  if (alarmInterval !== undefined) {
+    window.clearInterval(alarmInterval);
+    alarmInterval = undefined;
+  }
+
+  if (alarmTimeout !== undefined) {
+    window.clearTimeout(alarmTimeout);
+    alarmTimeout = undefined;
+  }
+
+  if (alarmContext) {
+    void alarmContext.close();
+    alarmContext = undefined;
+  }
+}
+
+function startAlarm(): void {
+  try {
+    alarmContext = new AudioContext();
+    void alarmContext.resume();
+    startTone();
+    alarmInterval = window.setInterval(startTone, 1_000);
+    alarmTimeout = window.setTimeout(stopAlarm, 30_000);
+  } catch {
+    showStatus('Sound could not be started.');
+  }
+}
+
+async function send(message: ExtensionMessage): Promise<TimerSnapshot> {
+  const response = await extensionClient.send<ExtensionResponse>(message);
+
+  if (!isExtensionResponse(response)) {
+    throw new Error('Received an invalid response from the background context.');
+  }
+
+  if (!response.ok) {
+    throw new Error(response.message);
+  }
+
+  return response.snapshot;
+}
+
+function closeAlert(): void {
+  stopAlarm();
+  window.close();
+}
+
+async function cancelCompletion(): Promise<void> {
+  try {
+    await send({ type: MESSAGE_TYPES.cancelCompletion });
+    closeAlert();
+  } catch (error: unknown) {
+    showStatus(error instanceof Error ? error.message : 'Could not cancel the timer.', true);
+  }
+}
+
+function showRestartOptions(snapshot: TimerSnapshot): void {
+  selectedRestartMinutes = Math.round(snapshot.selectedDurationMs / 60_000);
+  setSelectedRestartMinutes(selectedRestartMinutes);
+  restartPanelElement.hidden = false;
+  restartButtonElement.hidden = true;
+  confirmRestartButtonElement.hidden = false;
+  descriptionElement.textContent = 'Choose a duration before starting again.';
+  stopAlarm();
+}
+
+async function restartCompletion(): Promise<void> {
+  try {
+    await send({ type: MESSAGE_TYPES.restart, durationMinutes: selectedRestartMinutes });
+    closeAlert();
+  } catch (error: unknown) {
+    showStatus(error instanceof Error ? error.message : 'Could not restart the timer.', true);
+  }
+}
+
+async function initialize(): Promise<void> {
+  try {
+    const snapshot = await send({ type: MESSAGE_TYPES.getSnapshot });
+
+    if (snapshot.state !== 'completed') {
+      descriptionElement.textContent = 'The timer is no longer complete.';
+      stopAlarm();
+      return;
+    }
+
+    setSelectedRestartMinutes(Math.round(snapshot.selectedDurationMs / 60_000));
+    startAlarm();
+  } catch (error: unknown) {
+    showStatus(error instanceof Error ? error.message : 'Could not load timer completion.', true);
+  }
+}
+
+restartDurationElement.addEventListener('change', () => {
+  setSelectedRestartMinutes(Number(restartDurationElement.value));
+});
+
+restartQuickAccessElement.addEventListener('click', (event) => {
+  const target = event.target;
+
+  if (!(target instanceof HTMLButtonElement) || target.dataset.minutes === undefined) {
+    return;
+  }
+
+  setSelectedRestartMinutes(Number(target.dataset.minutes));
+});
+
+cancelButtonElement.addEventListener('click', () => {
+  void cancelCompletion();
+});
+
+restartButtonElement.addEventListener('click', () => {
+  void send({ type: MESSAGE_TYPES.getSnapshot })
+    .then((snapshot) => showRestartOptions(snapshot))
+    .catch((error: unknown) => {
+      showStatus(error instanceof Error ? error.message : 'Could not prepare restart.', true);
+    });
+});
+
+confirmRestartButtonElement.addEventListener('click', () => {
+  void restartCompletion();
+});
+
+window.addEventListener('beforeunload', stopAlarm);
+
+createDurationOptions();
+createQuickAccessButtons();
+void initialize();
