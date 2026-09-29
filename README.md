@@ -65,18 +65,18 @@ npm run build:chrome
 
 ## Commands
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Watch and build the Chrome extension. |
-| `npm run build:chrome` | Create `dist/chrome/`. |
-| `npm run build:firefox` | Create the future Firefox build. |
-| `npm run build:safari` | Create the future Safari WebExtension build. |
-| `npm run build:all` | Build all configured browser targets. |
-| `npm run test` | Run browser-independent unit tests. |
-| `npm run typecheck` | Run strict TypeScript checks. |
-| `npm run lint` | Run ESLint. |
-| `npm run format:check` | Check Prettier formatting. |
-| `npm run check` | Run lint, formatting, type checks, tests, and builds. |
+| Command                 | Purpose                                               |
+| ----------------------- | ----------------------------------------------------- |
+| `npm run dev`           | Watch and build the Chrome extension.                 |
+| `npm run build:chrome`  | Create `dist/chrome/`.                                |
+| `npm run build:firefox` | Create the future Firefox build.                      |
+| `npm run build:safari`  | Create the future Safari WebExtension build.          |
+| `npm run build:all`     | Build all configured browser targets.                 |
+| `npm run test`          | Run browser-independent unit tests.                   |
+| `npm run typecheck`     | Run strict TypeScript checks.                         |
+| `npm run lint`          | Run ESLint.                                           |
+| `npm run format:check`  | Check Prettier formatting.                            |
+| `npm run check`         | Run lint, formatting, type checks, tests, and builds. |
 
 Run the complete validation suite before sharing changes:
 
