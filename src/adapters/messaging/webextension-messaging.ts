@@ -1,15 +1,13 @@
 import type Browser from 'webextension-polyfill';
-import type { ExtensionMessage, ExtensionResponse } from '../../core/ports/message-port';
-
 export interface MessagingPort {
-  send(message: ExtensionMessage): Promise<ExtensionResponse>;
+  send<TResponse>(message: unknown): Promise<TResponse>;
   onMessage(handler: MessageHandler): void;
 }
 
 export type MessageHandler = (
-  message: ExtensionMessage,
+  message: unknown,
   sender: Browser.Runtime.MessageSender,
-) => Promise<ExtensionResponse>;
+) => Promise<unknown>;
 
 /**
  * Adapts the callback-shaped runtime listener to the Promise-based port.
@@ -17,13 +15,13 @@ export type MessageHandler = (
  */
 export function createWebExtensionMessaging(browserApi: typeof Browser): MessagingPort {
   return {
-    send(message: ExtensionMessage): Promise<ExtensionResponse> {
-      return browserApi.runtime.sendMessage<ExtensionMessage, ExtensionResponse>(message);
+    send<TResponse>(message: unknown): Promise<TResponse> {
+      return browserApi.runtime.sendMessage<unknown, TResponse>(message);
     },
 
     onMessage(handler: MessageHandler): void {
       browserApi.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        void handler(message as ExtensionMessage, sender)
+        void handler(message, sender)
           .then((response) => sendResponse(response))
           .catch(() => sendResponse(undefined));
         return true;
