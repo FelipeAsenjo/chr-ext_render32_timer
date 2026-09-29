@@ -3,6 +3,8 @@ import { createTimerService } from '../src/core/application/timer-service';
 import { createMemoryStorage } from '../src/adapters/storage/memory-storage';
 import {
   DEFAULT_DURATION_MINUTES,
+  formatBadge,
+  formatCountdown,
   TIMER_STATES,
   durationMinutesToMilliseconds,
 } from '../src/core/timer/timer-model';
@@ -130,5 +132,31 @@ describe('timer service', () => {
     const service = createTimerService({ storage, clock });
 
     await expect(service.initialize()).resolves.toMatchObject({ state: TIMER_STATES.idle });
+  });
+
+  it('formats countdown and badge values at the 60-second boundary', () => {
+    expect(formatCountdown(61_000)).toBe('01:01');
+    expect(formatCountdown(60_000)).toBe('01:00');
+    expect(formatBadge(61_000)).toBe('1');
+    expect(formatBadge(60_000)).toBe('60s');
+    expect(formatBadge(15_100)).toBe('16s');
+    expect(formatBadge(0)).toBe('');
+  });
+
+  it('restores a running timer from shared storage', async () => {
+    const storage = createMemoryStorage();
+    const firstClock = createClock();
+    const firstService = createTimerService({ storage, clock: firstClock });
+
+    await firstService.selectAndStart(5);
+    firstClock.advance(10_000);
+
+    const secondClock = createClock(firstClock.now());
+    const secondService = createTimerService({ storage, clock: secondClock });
+
+    await expect(secondService.initialize()).resolves.toMatchObject({
+      state: TIMER_STATES.running,
+      endAtMs: firstClock.now() + durationMinutesToMilliseconds(5) - 10_000,
+    });
   });
 });

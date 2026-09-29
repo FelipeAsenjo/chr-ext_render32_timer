@@ -156,9 +156,10 @@ It does not need host permissions or content scripts. It does not inspect,
 collect, or modify page content. No secrets should be included in the
 extension because distributed browser code can be inspected.
 
-The completion alert is an extension-owned page or window. The `notifications`
-permission is not required unless a future version adds a system notification
-fallback.
+The completion alert is an extension-owned page opened as an independent
+window. Its alarm uses Web Audio and does not require the `notifications`
+permission. A future system-notification fallback would require an explicit
+permission and product decision.
 
 ## Project Structure
 

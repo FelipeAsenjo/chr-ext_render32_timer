@@ -119,9 +119,10 @@ The initial implementation should request only:
 The extension does not require host permissions or content scripts because it
 does not modify web pages.
 
-The completion alert should use an extension-owned page or window. The
-`notifications` permission is not required unless a future version adds a
-system notification fallback.
+The completion alert uses an extension-owned page opened as an independent
+window. Its alarm uses Web Audio and does not require page access or the
+`notifications` permission. A future version may add a system notification
+fallback separately.
 
 ## 7. Architecture
 
@@ -157,6 +158,10 @@ must be covered by browser-independent unit tests.
   duration.
 - No page content is read or modified.
 - Core timer behavior can be tested without a browser.
+
+The popup and alert pages communicate with the background runtime through
+validated messages. The alert page stops its Web Audio alarm after 30 seconds
+even when the user does not interact with the window.
 
 ## 9. Future Scope
 
