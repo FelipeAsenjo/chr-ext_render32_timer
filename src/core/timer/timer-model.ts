@@ -93,3 +93,25 @@ export function getRemainingMilliseconds(snapshot: TimerSnapshot, nowMs: number)
 
   return 0;
 }
+
+export function formatCountdown(milliseconds: number): string {
+  const remainingSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+  const minutes = Math.floor(remainingSeconds / 60);
+  const seconds = remainingSeconds % 60;
+
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+export function formatBadge(milliseconds: number): string {
+  const remainingMilliseconds = Math.max(0, milliseconds);
+
+  if (remainingMilliseconds === 0) {
+    return '';
+  }
+
+  if (remainingMilliseconds <= 60_000) {
+    return `${Math.ceil(remainingMilliseconds / 1000)}s`;
+  }
+
+  return Math.floor(remainingMilliseconds / MILLISECONDS_PER_MINUTE).toString();
+}
