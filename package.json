@@ -5,18 +5,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run build:chrome",
+    "build": "yarn build:chrome",
     "build:chrome": "vite build --mode chrome",
     "build:firefox": "vite build --mode firefox",
     "build:safari": "vite build --mode safari",
-    "build:all": "npm run build:chrome && npm run build:firefox && npm run build:safari",
+    "build:all": "yarn build:chrome && yarn build:firefox && yarn build:safari",
     "dev": "vite build --mode chrome --watch",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run lint && npm run format:check && npm run typecheck && npm run test && npm run build:all"
+    "check": "yarn lint && yarn format:check && yarn typecheck && yarn test && yarn build:all"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.2.0",
