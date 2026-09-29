@@ -14,7 +14,19 @@
       </header>
 
       <section class="display-panel" aria-label="Timer">
-        <p id="countdown" class="countdown" aria-live="polite">45:00</p>
+        <button id="countdown" class="countdown" type="button" aria-label="Edit custom duration">
+          45:00
+        </button>
+        <input
+          id="duration-editor"
+          class="duration-editor"
+          type="number"
+          min="1"
+          max="1440"
+          inputmode="numeric"
+          aria-label="Custom duration in minutes"
+          hidden
+        />
         <p id="selected-duration" class="selected-duration">45 minutes selected</p>
       </section>
 
@@ -30,11 +42,6 @@
         </div>
         <div id="quick-access" class="quick-grid"></div>
       </section>
-
-      <label class="custom-duration" for="custom-duration">
-        <span>Custom duration</span>
-        <select id="custom-duration"></select>
-      </label>
 
       <p id="status" class="status" role="status"></p>
     </main>
