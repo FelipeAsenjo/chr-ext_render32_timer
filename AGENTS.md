@@ -16,8 +16,11 @@
   `paused`, and `completed`.
 - The default duration is 45 minutes.
 - Quick-access durations are 5, 10, 15, 30, 45, 60, and 90 minutes.
-- Custom durations are selected in whole minutes from 1 to 1440.
-- Selecting a duration starts the timer immediately.
+- Custom durations are entered inline as whole minutes from 1 to 1440.
+- Selecting a quick-access duration starts the timer immediately.
+- Confirming a custom duration stores it without starting; `Start` begins it.
+- Editing a custom duration while paused replaces the paused duration and keeps
+  the timer paused until `Start` is pressed.
 - Pause preserves the exact remaining seconds.
 - Refresh restarts the last selected duration immediately.
 - Quick-access controls are disabled while running and enabled while paused.

@@ -19,11 +19,14 @@ The popup provides:
 - A `Start` or `Pause` control depending on the current state.
 - A `Refresh` control.
 - Quick-access durations of 5, 10, 15, 30, 45, 60, and 90 minutes.
-- A custom selector for a duration from 1 to 1440 minutes.
+- An inline custom-duration editor on the main countdown, accepting 1 to 1440
+  whole minutes.
 
-Selecting any duration starts the timer immediately. The selected duration is
-remembered and becomes the duration used by `Refresh`. If no duration has
-previously been selected, the default is 45 minutes.
+Selecting a quick-access duration starts the timer immediately. Editing and
+confirming a custom duration only stores the selection; the timer starts when
+the user presses `Start`. The selected duration is remembered and becomes the
+duration used by `Refresh`. If no duration has previously been selected, the
+default is 45 minutes.
 
 ## 3. Timer States
 
@@ -57,6 +60,17 @@ immediately. It does not use the previously remaining duration.
 Selecting a quick-access duration stores that duration and starts the timer
 immediately. Quick-access controls are disabled while the timer is running and
 enabled while it is paused or idle.
+
+### Custom Duration
+
+While `idle` or `paused`, clicking the main countdown changes it into a numeric
+input for whole minutes from 1 to 1440. Pressing `Enter` or clicking outside the
+input confirms and stores the value without starting the timer. Pressing
+`Escape` cancels the edit and restores the previous selection.
+
+When editing from `paused`, the new duration replaces the paused duration and
+the timer remains paused. Pressing `Start` begins the new duration from zero.
+The countdown is not editable while the timer is running or completed.
 
 ### Completion
 
@@ -145,7 +159,8 @@ must be covered by browser-independent unit tests.
 - A first-use timer starts at 45 minutes when selected through the default
   control.
 - Quick-access selections start immediately.
-- A custom duration between 1 and 1440 minutes can be selected and started.
+- A custom duration between 1 and 1440 minutes can be entered inline, confirmed,
+  and started with the `Start` control.
 - Pause and resume preserve the exact remaining seconds.
 - Refresh immediately restarts the last selected duration.
 - Closing and reopening the popup shows the current remaining time.

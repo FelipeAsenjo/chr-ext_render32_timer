@@ -18,7 +18,7 @@ so Firefox and Safari can be evaluated later.
 - Countdown display with minutes and seconds.
 - Start, pause, and refresh controls.
 - Quick-access durations of 5, 10, 15, 30, 45, 60, and 90 minutes.
-- Custom duration selector from 1 to 1440 minutes.
+- Inline custom duration entry from 1 to 1440 minutes.
 - Last selected duration remembered between sessions.
 - Default duration of 45 minutes.
 - Timer continues when the popup is closed or Chrome restarts.
@@ -119,6 +119,8 @@ platform-specific code. Browser APIs are accessed through adapters using
 The timer has four states: `idle`, `running`, `paused`, and `completed`.
 
 - Selecting a quick duration starts it immediately.
+- Editing the main countdown stores a custom duration without starting it.
+- Pressing `Start` after a custom selection starts that duration.
 - Starting uses the current selected duration.
 - Pausing preserves the exact remaining seconds.
 - Refresh resets and immediately starts the last selected duration.
