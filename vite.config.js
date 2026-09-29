@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
+import { resolve } from 'node:path';
 import createChromeManifest from './src/manifests/chrome.ts';
 import createFirefoxManifest from './src/manifests/firefox.ts';
 import createSafariManifest from './src/manifests/safari.ts';
@@ -15,5 +16,10 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: `dist/${mode}`,
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        alert: resolve(import.meta.dirname, 'src/alert/alert.html'),
+      },
+    },
   },
 }));
