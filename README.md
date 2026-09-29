@@ -1,166 +1,200 @@
-# Cross-Browser Extension Starter
+# render32_timer
 
-A small Manifest V3 WebExtension template for Chrome, Firefox, and Safari. It uses TypeScript and Vite, with a Ports and Adapters architecture that keeps the application core independent from browser APIs.
+Simple countdown timer for Chrome.
 
-This document is the main reference for the template. It explains what was created, what each part is for, how to use it, and where to find browser-specific API documentation.
+`render32_timer` is a focused Manifest V3 browser extension. It provides a
+customizable countdown in the extension popup, keeps one timer running in the
+background, and alerts the user when the countdown ends. It does not read or
+modify web pages.
+
+Repository: `git@github.com:FelipeAsenjo/chr-ext_render32_timer.git`
+
+The product specification is in [`SPEC.md`](./SPEC.md). The first release
+targets Chrome. The project structure keeps browser-specific concerns isolated
+so Firefox and Safari can be evaluated later.
+
+## Features
+
+- Countdown display with minutes and seconds.
+- Start, pause, and refresh controls.
+- Quick-access durations of 5, 10, 15, 30, 45, 60, and 90 minutes.
+- Custom duration selector from 1 to 1440 minutes.
+- Last selected duration remembered between sessions.
+- Default duration of 45 minutes.
+- Timer continues when the popup is closed or Chrome restarts.
+- Independent completion alert with a 30-second alarm sound.
+- Restart and cancel actions after completion.
+- Badge showing remaining minutes, or seconds when 60 seconds or less remain.
 
 ## Requirements
 
-- Node.js 20 or newer
-- TypeScript strict mode is enabled for application and test code
-- Google Chrome for primary local development
-- Xcode for Safari packaging and testing
+- Node.js 20 or newer.
+- npm.
+- Google Chrome for local development and browser validation.
+
+Safari packaging requires Xcode and is not part of the initial release. Firefox
+and Safari manifests remain future compatibility targets.
 
 ## Getting Started
 
+Install dependencies:
+
 ```bash
 npm install
+```
+
+Run the Chrome development build:
+
+```bash
 npm run dev
 ```
 
-`npm run dev` keeps `dist/chrome/` updated while you edit. In Chrome, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `dist/chrome/`.
+The command keeps `dist/chrome/` updated while files change. To load the
+extension in Chrome:
 
-Build all browser targets with:
+1. Open `chrome://extensions`.
+2. Enable **Developer mode**.
+3. Select **Load unpacked**.
+4. Choose `dist/chrome/`.
+
+Build the Chrome extension once with:
 
 ```bash
-npm run build:all
+npm run build:chrome
 ```
 
-Run the complete validation suite before sharing or publishing changes:
+## Commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Watch and build the Chrome extension. |
+| `npm run build:chrome` | Create `dist/chrome/`. |
+| `npm run build:firefox` | Create the future Firefox build. |
+| `npm run build:safari` | Create the future Safari WebExtension build. |
+| `npm run build:all` | Build all configured browser targets. |
+| `npm run test` | Run browser-independent unit tests. |
+| `npm run typecheck` | Run strict TypeScript checks. |
+| `npm run lint` | Run ESLint. |
+| `npm run format:check` | Check Prettier formatting. |
+| `npm run check` | Run lint, formatting, type checks, tests, and builds. |
+
+Run the complete validation suite before sharing changes:
 
 ```bash
 npm run check
 ```
 
-## Structure
-
-```text
-src/
-  core/          Business rules and use cases without browser APIs
-    application/ Application use cases
-    ports/       Contracts required by the core
-  adapters/      Implementations of ports for external APIs
-  composition/  Composition roots that wire each runtime
-  content/       Code that can run in web pages
-  manifests/     Browser-specific Manifest V3 variants
-  options/       Full settings page
-  popup/         Toolbar popup interface
-public/icons/    Static extension icons
-test/            Browser-independent core tests
-tsconfig.json    Strict TypeScript compiler configuration
-vitest.config.js Browser-independent test runner configuration
-```
-
 ## Architecture
 
-The application follows Ports and Adapters, also known as Hexagonal Architecture:
+The project follows Ports and Adapters, also known as Hexagonal Architecture:
 
 ```text
-Browser events / UI
-        |
-        v
+Chrome APIs / UI
+       |
+       v
    adapters  --->  ports
                        ^
                        |
                  core / use cases
 ```
 
-- `src/core/` contains pure business rules. It does not import `chrome`, `browser`, DOM globals, or Vite.
-- `src/core/` is TypeScript-first and should expose narrow types at every application boundary.
-- `src/core/ports/` defines the contracts required by the core, such as storage and messaging.
-- `src/adapters/` translates WebExtension APIs into those contracts. `webextension-polyfill` normalizes API names and Promise behavior.
-- `src/composition/` wires adapters to use cases. It is the composition root for executable browser code.
-- `src/manifests/` changes only the browser-specific manifest details without duplicating application behavior.
-- `test/` uses in-memory adapters to test the core without installing a browser.
+- `src/core/` contains browser-independent timer rules and use cases.
+- `src/core/ports/` defines contracts for storage, alarms, badges, and alert
+  handling.
+- `src/adapters/` implements browser APIs behind those contracts.
+- `src/composition/` wires the Chrome runtime and UI clients.
+- `src/popup/` contains the main timer interface.
+- `src/alert/` contains the independent completion alert interface.
+- `src/manifests/` contains browser-specific manifest variants.
+- `test/` contains unit tests that do not require a browser.
+- `public/icons/` contains extension assets.
+- `dist/` contains generated builds and must not be edited manually.
 
-Polymorphism is achieved by injecting port implementations. Production uses `createWebExtensionStorage`; tests use `createMemoryStorage`. The use case remains the same in both environments.
+The core must not import `chrome`, `browser`, DOM globals, Vite modules, or
+platform-specific code. Browser APIs are accessed through adapters using
+`webextension-polyfill` where appropriate.
 
-## File Responsibilities
+## Timer Behavior
 
-- `package.json`: development, validation, testing, and browser build commands.
-- `package-lock.json`: exact dependency versions for reproducible installs.
-- `vite.config.js`: Vite and CRXJS configuration, including target-specific output directories.
-- `eslint.config.js`: JavaScript and TypeScript lint rules, including type-aware rules.
-- `tsconfig.json`: strict compiler configuration. `allowJs` is intentionally disabled for application code.
-- `vitest.config.js`: Node-style test environment and TypeScript test discovery.
-- `.prettierrc`: shared formatting rules.
-- `src/manifests/base.ts`: common metadata, permissions, entries, scripts, and icons.
-- `src/manifests/chrome.ts`: Chrome manifest, including the service worker background.
-- `src/manifests/firefox.ts`: Firefox manifest, Gecko ID, and background script configuration.
-- `src/manifests/safari.ts`: Safari WebExtension manifest variant.
-- `src/core/application/status-service.ts`: browser-independent example use case.
-- `src/core/ports/`: message names and storage contracts used by the core.
-- `src/adapters/browser/`: the single normalized WebExtension API entry point.
-- `src/adapters/storage/`: browser storage and in-memory test implementations.
-- `src/adapters/messaging/`: runtime message implementation.
-- `src/adapters/lifecycle/`: installation and lifecycle event implementation.
-- `src/composition/background.ts`: background runtime composition and message handlers.
-- `src/composition/extension-client.ts`: UI-side messaging composition.
-- `src/popup/`: toolbar popup markup, styles, and UI event handling.
-- `src/options/`: full settings page markup, styles, and UI event handling.
-- `src/content/content.ts`: example content script that communicates through the runtime adapter.
-- `public/icons/`: static icons referenced by the manifests.
-- `test/`: unit tests for core behavior.
-- `dist/`: generated output. Load the browser-specific subdirectory into the corresponding browser.
+The timer has four states: `idle`, `running`, `paused`, and `completed`.
 
-## Important Decisions
+- Selecting a quick duration starts it immediately.
+- Starting uses the current selected duration.
+- Pausing preserves the exact remaining seconds.
+- Refresh resets and immediately starts the last selected duration.
+- Quick-access controls are disabled while running and enabled while paused.
+- Only one timer can exist at a time.
+- Canceling completion resets the selection to 45 minutes and stops the timer.
+- Restarting offers the previous selection before confirmation and allows a
+  quick duration to be chosen.
 
-- The background runtime must not assume that it stays alive. Persistent state belongs in browser storage.
-- Permissions are minimal (`storage`) and `host_permissions` starts empty. Add only permissions required by a feature.
-- Content scripts communicate through messages instead of page globals, reducing collisions with visited pages.
-- The base manifest is shared, while browser variants express only platform differences.
-- Safari reuses the WebExtension build, but distribution requires an Xcode host application.
-- Never include secrets in an extension. Distributed browser code can be inspected.
-- Keep type assertions at external boundaries only. Prefer runtime validation when data comes from a browser API or message.
-- Use `unknown` for untrusted values and narrow it before use; do not replace uncertainty with `any`.
-- Make message unions exhaustive so adding a message forces all handlers to be updated.
-- Keep DOM queries checked for `null` before registering listeners or reading values.
-- Add comments when they explain a lifecycle, browser compatibility, security, or architectural constraint.
+The background runtime stores an absolute end timestamp and uses the Chrome
+Alarms API to resolve completion while the popup is closed. This avoids relying
+on an in-memory interval that would be lost when Chrome suspends the extension.
 
-## Customization
+## Badge Behavior
 
-1. Change `name`, `description`, and `version` in `src/manifests/base.ts`.
-2. Replace the example `enabled` state in `src/core/` with the extension's domain behavior and types.
-3. Define new messages in `src/core/ports/message-port.ts` and handle them in `src/composition/background.ts`.
-4. Replace the SVG icons in `public/icons/`.
-5. Replace `https://example.com/*` with specific patterns in `content_scripts.matches`, and add justified `host_permissions` only when necessary.
-6. Add browser-specific behavior as an adapter or manifest variant instead of adding platform checks to the core.
+The badge is visible only while the timer is running:
 
-## Builds and Distribution
+- More than 60 seconds remaining: whole minutes, such as `44`.
+- 60 seconds or less remaining: seconds with an `s` suffix, such as `15s`.
+- Idle, paused, and completed states: no badge.
 
-- `npm run build:chrome`: creates `dist/chrome/`, loadable from `chrome://extensions`.
-- `npm run build:firefox`: creates `dist/firefox/`, loadable from `about:debugging`.
-- `npm run build:safari`: creates `dist/safari/`, used as input for Xcode conversion.
-- `npm run build:all`: creates all three builds.
-- `npm run test`: runs browser-independent core tests with Node.js.
-- `npm run typecheck`: validates all application and test types without emitting files.
-- `npm run check`: runs lint, formatting checks, tests, and all three builds.
+The timer itself remains exact because it uses persisted timestamps. Badge
+refreshes while the popup is closed are best effort because Chrome does not
+guarantee a one-second service-worker wake-up cadence. The popup always
+calculates and displays the exact remaining time when opened.
 
-For Safari on macOS:
+## Permissions and Privacy
 
-```bash
-xcrun safari-web-extension-converter dist/safari --app-name "Cross Browser Extension"
+The extension is designed to use only the permissions needed for its timer:
+
+- `storage` for the selected duration and timer state.
+- `alarms` for background completion handling.
+
+It does not need host permissions or content scripts. It does not inspect,
+collect, or modify page content. No secrets should be included in the
+extension because distributed browser code can be inspected.
+
+The completion alert is an extension-owned page or window. The `notifications`
+permission is not required unless a future version adds a system notification
+fallback.
+
+## Project Structure
+
+```text
+src/
+  core/          Browser-independent rules and use cases
+    application/ Application services
+    ports/       Dependency contracts
+  adapters/      Chrome and external API implementations
+  composition/  Runtime dependency wiring
+  manifests/    Browser-specific manifest variants
+  popup/        Main timer popup
+  alert/        Completion alert window
+public/icons/    Extension icons
+test/            Browser-independent unit tests
+SPEC.md          Product and technical specification
 ```
 
-Open the generated project in Xcode to configure the Bundle Identifier, signing, permissions, and distribution. Safari on iOS and iPadOS also requires an application target for those platforms.
+## Development Guidelines
 
-Firefox requires a stable identifier in `src/manifests/firefox.js` before publishing to AMO. Replace `extension@example.com` with the real extension ID.
+- Use TypeScript for application and test code.
+- Keep strict TypeScript checks enabled.
+- Add unit tests for timer state transitions and persistence behavior.
+- Keep permissions minimal and review every manifest change.
+- Use `unknown` for untrusted external values and narrow before use.
+- Keep browser-specific behavior in adapters or manifest variants.
+- Do not add page host matches or content scripts without a product requirement.
+- Keep comments focused on lifecycle, compatibility, security, or architectural
+  constraints.
 
-## Browser API Documentation
+## Future Browser Support
 
-Use the common WebExtensions documentation first. Consult browser-specific documentation only when an API or manifest behavior differs:
+Firefox and Safari are future targets, not release claims for the initial
+Chrome version. The build configuration already has browser-specific entry
+points, but each target must be tested independently before being described as
+supported.
 
-- [Chrome Extensions documentation](https://developer.chrome.com/docs/extensions/)
-- [Chrome Extensions API reference](https://developer.chrome.com/docs/extensions/reference/api)
-- [Chrome Manifest file format](https://developer.chrome.com/docs/extensions/reference/manifest)
-- [Firefox WebExtensions documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
-- [Firefox WebExtensions API reference](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API)
-- [Firefox manifest.json reference](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json)
-- [Safari Web Extensions documentation](https://developer.apple.com/documentation/safariservices/safari_web_extensions)
-- [Safari Web Extension Converter](https://developer.apple.com/documentation/safariservices/safari_web_extensions/converting_a_web_extension_for_safari)
-- [Safari Extensions development overview](https://developer.apple.com/documentation/safariservices)
-- [WebExtension Polyfill API](https://github.com/mozilla/webextension-polyfill)
-
-## Validation Status
-
-The template is validated with ESLint, Prettier, core unit tests, and production builds for Chrome, Firefox, and Safari through `npm run check`. Browser installation and Safari Xcode packaging still need to be exercised on the target machines before claiming release readiness.
+Safari distribution requires an Xcode host application. A successful
+WebExtension build alone is not sufficient to claim Safari support.
