@@ -1,0 +1,166 @@
+# render32_timer Specification
+
+## 1. Product
+
+`render32_timer` is a simple countdown timer for Chrome. Its purpose is to
+provide a focused timer in the extension popup without modifying web pages.
+
+The initial release targets Chrome and Manifest V3. The project keeps its
+browser boundaries flexible so Firefox and Safari can be considered later.
+
+## 2. User Flow
+
+The user opens the extension popup and sees the remaining countdown, the
+current selection, and timer controls.
+
+The popup provides:
+
+- A countdown showing minutes and seconds.
+- A `Start` or `Pause` control depending on the current state.
+- A `Refresh` control.
+- Quick-access durations of 5, 10, 15, 30, 45, 60, and 90 minutes.
+- A custom selector for a duration from 1 to 1440 minutes.
+
+Selecting any duration starts the timer immediately. The selected duration is
+remembered and becomes the duration used by `Refresh`. If no duration has
+previously been selected, the default is 45 minutes.
+
+## 3. Timer States
+
+The timer has four states:
+
+- `idle`: no countdown is running and no badge is shown.
+- `running`: the countdown is active and the badge displays the remaining time.
+- `paused`: the countdown is stopped with its exact remaining time preserved;
+  quick-access controls are enabled.
+- `completed`: the countdown reached zero and the completion alert is open.
+
+Only one timer may exist at a time.
+
+### Start
+
+Starting a timer uses the current selected duration and immediately enters the
+`running` state.
+
+### Pause
+
+Pausing stores the exact remaining duration, including seconds, and enters the
+`paused` state. The timer does not continue while paused.
+
+### Refresh
+
+Refreshing resets the timer to the last selected duration and starts it
+immediately. It does not use the previously remaining duration.
+
+### Quick Access
+
+Selecting a quick-access duration stores that duration and starts the timer
+immediately. Quick-access controls are disabled while the timer is running and
+enabled while it is paused or idle.
+
+### Completion
+
+When the countdown reaches zero:
+
+1. The timer enters `completed`.
+2. The badge is removed.
+3. An independent extension alert window opens.
+4. An alarm sound plays for 30 seconds and then becomes muted.
+5. The alert remains open until the user chooses `Cancel` or `Restart`.
+
+`Cancel` closes the alert, resets the selected duration to the default 45
+minutes, and returns to `idle`.
+
+`Restart` presents the last selected duration before confirmation. The user can
+confirm that duration or choose another quick-access duration. Confirming a
+duration starts a new timer immediately.
+
+## 4. Persistence and Lifecycle
+
+The timer must continue counting when the popup is closed and after Chrome is
+restarted.
+
+The application stores:
+
+- The last selected duration.
+- The timer state.
+- The absolute end timestamp while running.
+- The exact remaining duration while paused.
+
+The running timer is based on an absolute end timestamp rather than an in-memory
+interval. This allows the background context to reconstruct the remaining time
+after being suspended or restarted.
+
+The background runtime uses `chrome.alarms` to wake at completion. On startup,
+it must compare the stored timestamp with the current time and resolve an
+already-completed timer instead of trusting stale in-memory state.
+
+## 5. Badge
+
+The badge is shown only while the timer is `running`.
+
+- More than 60 seconds remaining: show whole minutes, for example `44`.
+- 60 seconds or less remaining: show seconds with an `s` suffix, for example
+  `15s`.
+- `idle`, `paused`, and `completed`: remove the badge.
+
+When the popup is open, it should display the exact remaining time. When the
+popup is closed, badge updates are best effort because Chrome service workers
+and alarms do not guarantee a one-second wake-up cadence. The persisted timer
+and completion event remain exact even when badge rendering is approximate.
+
+## 6. Permissions
+
+The initial implementation should request only:
+
+- `storage`: persist the selected duration and timer state.
+- `alarms`: schedule background completion handling.
+
+The extension does not require host permissions or content scripts because it
+does not modify web pages.
+
+The completion alert should use an extension-owned page or window. The
+`notifications` permission is not required unless a future version adds a
+system notification fallback.
+
+## 7. Architecture
+
+The project follows Ports and Adapters:
+
+- `src/core/` contains timer rules, state transitions, and use cases without
+  browser APIs.
+- `src/core/ports/` defines storage, alarm, badge, and alert contracts.
+- `src/adapters/` implements Chrome APIs behind those contracts.
+- `src/composition/` wires the Chrome runtime and UI clients.
+- `src/popup/` renders the main timer interface.
+- `src/alert/` renders the independent completion alert.
+- `src/manifests/` contains the Chrome manifest and future browser variants.
+
+Timer calculations should use integer milliseconds or seconds consistently and
+must be covered by browser-independent unit tests.
+
+## 8. Acceptance Criteria
+
+- A first-use timer starts at 45 minutes when selected through the default
+  control.
+- Quick-access selections start immediately.
+- A custom duration between 1 and 1440 minutes can be selected and started.
+- Pause and resume preserve the exact remaining seconds.
+- Refresh immediately restarts the last selected duration.
+- Closing and reopening the popup shows the current remaining time.
+- Chrome restart does not reset a running timer.
+- A running timer shows the specified badge format.
+- A paused or completed timer has no badge.
+- Completion opens an independent alert and sounds for no more than 30 seconds.
+- Cancel returns to an idle 45-minute default.
+- Restart allows confirmation of the previous duration or selection of a quick
+  duration.
+- No page content is read or modified.
+- Core timer behavior can be tested without a browser.
+
+## 9. Future Scope
+
+- Firefox and Safari builds.
+- Final extension icon and visual identity.
+- Optional system notifications.
+- Additional timer presets or user-configurable presets.
