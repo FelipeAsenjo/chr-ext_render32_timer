@@ -23,7 +23,7 @@ so Firefox and Safari can be evaluated later.
 - Default duration of 45 minutes.
 - Timer continues when the popup is closed or Chrome restarts.
 - Independent completion alert with a 30-second alarm sound.
-- Restart and cancel actions after completion.
+- Restart with inline custom duration and cancel actions after completion.
 - Badge showing remaining time as `Xm` or `Xs`.
 
 ## Requirements
@@ -108,7 +108,8 @@ Chrome APIs / UI
 - `src/offscreen/` contains the hidden worker used for frequent badge updates.
 - `src/manifests/` contains browser-specific manifest variants.
 - `test/` contains unit tests that do not require a browser.
-- `public/icons/` contains extension assets.
+- `public/icons/` contains the source `chr-ext_render32-timer_icon.png` and
+  generated 16, 48, and 128 pixel PNG assets.
 - `dist/` contains generated builds and must not be edited manually.
 
 The core must not import `chrome`, `browser`, DOM globals, Vite modules, or
@@ -129,7 +130,7 @@ The timer has four states: `idle`, `running`, `paused`, and `completed`.
 - Only one timer can exist at a time.
 - Canceling completion resets the selection to 45 minutes and stops the timer.
 - Restarting offers the previous selection before confirmation and allows a
-  quick duration to be chosen.
+  custom duration or quick duration to be chosen.
 
 The background runtime stores an absolute end timestamp and uses the Chrome
 Alarms API to resolve completion while the popup is closed. This avoids relying

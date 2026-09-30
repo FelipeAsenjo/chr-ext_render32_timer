@@ -86,8 +86,8 @@ When the countdown reaches zero:
 minutes, and returns to `idle`.
 
 `Restart` presents the last selected duration before confirmation. The user can
-confirm that duration or choose another quick-access duration. Confirming a
-duration starts a new timer immediately.
+edit it inline or choose another quick-access duration. Confirming a duration
+starts a new timer immediately.
 
 ## 4. Persistence and Lifecycle
 
@@ -177,8 +177,8 @@ must be covered by browser-independent unit tests.
 - A paused or completed timer has no badge.
 - Completion opens an independent alert and sounds for no more than 30 seconds.
 - Cancel returns to an idle 45-minute default.
-- Restart allows confirmation of the previous duration or selection of a quick
-  duration.
+- Restart allows inline editing of the previous duration or selection of a
+  quick duration.
 - No page content is read or modified.
 - Core timer behavior can be tested without a browser.
 
@@ -189,6 +189,5 @@ even when the user does not interact with the window.
 ## 9. Future Scope
 
 - Firefox and Safari builds.
-- Final extension icon and visual identity.
 - Optional system notifications.
 - Additional timer presets or user-configurable presets.

@@ -25,7 +25,8 @@
 - Refresh restarts the last selected duration immediately.
 - Quick-access controls are disabled while running and enabled while paused.
 - Canceling completion resets the selection to 45 minutes and stops the timer.
-- Restarting completion offers the previous selection before confirmation.
+- Restarting completion offers the previous selection for inline editing before
+  confirmation, along with the quick-access durations.
 - Completion opens an independent extension alert and plays the alarm for at
   most 30 seconds.
 
