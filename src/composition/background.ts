@@ -10,6 +10,7 @@ import { formatBadge, getRemainingMilliseconds, TIMER_STATES } from '../core/tim
 import browser from '../adapters/browser/webextension-api';
 import { createWebExtensionAlarm } from '../adapters/alarm/webextension-alarm';
 import { createWebExtensionCompletionAlert } from '../adapters/alert/webextension-completion-alert';
+import { createWebExtensionBadge } from '../adapters/badge/webextension-badge';
 import { systemClock } from '../adapters/clock/system-clock';
 import { createWebExtensionLifecycle } from '../adapters/lifecycle/webextension-lifecycle';
 import { createWebExtensionMessaging } from '../adapters/messaging/webextension-messaging';
@@ -19,9 +20,7 @@ import { createWebExtensionStorage } from '../adapters/storage/webextension-stor
 const storage = createWebExtensionStorage(browser);
 const timerService = createTimerService({ storage, clock: systemClock });
 const alarm = createWebExtensionAlarm(browser);
-const badge = {
-  setText: (text: string): Promise<void> => browser.action.setBadgeText({ text }),
-};
+const badge = createWebExtensionBadge(browser);
 const completionAlert = createWebExtensionCompletionAlert(browser);
 const offscreen = createChromeOffscreen(browser);
 const lifecycle = createWebExtensionLifecycle(browser);
