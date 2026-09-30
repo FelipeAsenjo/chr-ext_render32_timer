@@ -107,21 +107,24 @@ after being suspended or restarted.
 
 The background runtime uses `chrome.alarms` to wake at completion. On startup,
 it must compare the stored timestamp with the current time and resolve an
-already-completed timer instead of trusting stale in-memory state.
+already-completed timer instead of trusting stale in-memory state. An offscreen
+document with a dedicated worker provides badge update ticks while the popup is
+closed.
 
 ## 5. Badge
 
 The badge is shown only while the timer is `running`.
 
-- More than 60 seconds remaining: show whole minutes, for example `44`.
+- More than 60 seconds remaining: show whole minutes with an `m` suffix, for
+  example `15m`.
 - 60 seconds or less remaining: show seconds with an `s` suffix, for example
   `15s`.
 - `idle`, `paused`, and `completed`: remove the badge.
 
 When the popup is open, it should display the exact remaining time. When the
-popup is closed, badge updates are best effort because Chrome service workers
-and alarms do not guarantee a one-second wake-up cadence. The persisted timer
-and completion event remain exact even when badge rendering is approximate.
+popup is closed, the offscreen worker sends one-second update ticks. The
+persisted timestamp and completion alarm remain authoritative if Chrome or the
+operating system suspends background execution.
 
 ## 6. Permissions
 
@@ -129,6 +132,8 @@ The initial implementation should request only:
 
 - `storage`: persist the selected duration and timer state.
 - `alarms`: schedule background completion handling.
+- `offscreen`: maintain a hidden worker for frequent badge updates while the
+  popup is closed.
 
 The extension does not require host permissions or content scripts because it
 does not modify web pages.
@@ -149,6 +154,7 @@ The project follows Ports and Adapters:
 - `src/composition/` wires the Chrome runtime and UI clients.
 - `src/popup/` renders the main timer interface.
 - `src/alert/` renders the independent completion alert.
+- `src/offscreen/` contains the hidden document and worker used for badge ticks.
 - `src/manifests/` contains the Chrome manifest and future browser variants.
 
 Timer calculations should use integer milliseconds or seconds consistently and
@@ -165,7 +171,9 @@ must be covered by browser-independent unit tests.
 - Refresh immediately restarts the last selected duration.
 - Closing and reopening the popup shows the current remaining time.
 - Chrome restart does not reset a running timer.
-- A running timer shows the specified badge format.
+- A running timer shows minutes as `Xm` and seconds as `Xs` in the badge.
+- A closed popup receives minute and second badge updates from the offscreen
+  worker while the timer is running.
 - A paused or completed timer has no badge.
 - Completion opens an independent alert and sounds for no more than 30 seconds.
 - Cancel returns to an idle 45-minute default.

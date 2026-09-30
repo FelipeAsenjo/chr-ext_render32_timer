@@ -56,17 +56,20 @@ product decision changes.
 - Store an absolute end timestamp while running.
 - Store exact remaining duration while paused.
 - Use Chrome alarms for background completion handling.
+- Use the offscreen document and worker for frequent badge updates while the
+  popup is closed.
 - Reconcile persisted state when the background context starts or wakes.
 - Treat a stored timer that has passed its end timestamp as completed.
 - Keep the badge visible only in the running state.
-- Show whole minutes above 60 seconds and seconds with an `s` suffix at 60
-  seconds or less.
-- Document that closed-popup badge updates are best effort; the timer itself
-  must remain exact.
+- Show whole minutes with an `m` suffix above 60 seconds and seconds with an
+  `s` suffix at 60 seconds or less.
+- Keep the persisted timestamp and completion alarm authoritative if background
+  execution is suspended.
 
 ## Permissions and Security
 
-- Keep permissions minimal. The initial product needs `storage` and `alarms`.
+- Keep permissions minimal. The initial product needs `storage`, `alarms`, and
+  `offscreen`.
 - Do not add host permissions, content scripts, or URL match patterns without a
   concrete product requirement.
 - The extension must not inspect or modify page content.

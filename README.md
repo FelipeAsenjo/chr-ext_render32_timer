@@ -24,7 +24,7 @@ so Firefox and Safari can be evaluated later.
 - Timer continues when the popup is closed or Chrome restarts.
 - Independent completion alert with a 30-second alarm sound.
 - Restart and cancel actions after completion.
-- Badge showing remaining minutes, or seconds when 60 seconds or less remain.
+- Badge showing remaining time as `Xm` or `Xs`.
 
 ## Requirements
 
@@ -105,6 +105,7 @@ Chrome APIs / UI
 - `src/composition/` wires the Chrome runtime and UI clients.
 - `src/popup/` contains the main timer interface.
 - `src/alert/` contains the independent completion alert interface.
+- `src/offscreen/` contains the hidden worker used for frequent badge updates.
 - `src/manifests/` contains browser-specific manifest variants.
 - `test/` contains unit tests that do not require a browser.
 - `public/icons/` contains extension assets.
@@ -138,14 +139,15 @@ on an in-memory interval that would be lost when Chrome suspends the extension.
 
 The badge is visible only while the timer is running:
 
-- More than 60 seconds remaining: whole minutes, such as `44`.
+- More than 60 seconds remaining: whole minutes with an `m` suffix, such as
+  `44m`.
 - 60 seconds or less remaining: seconds with an `s` suffix, such as `15s`.
 - Idle, paused, and completed states: no badge.
 
-The timer itself remains exact because it uses persisted timestamps. Badge
-refreshes while the popup is closed are best effort because Chrome does not
-guarantee a one-second service-worker wake-up cadence. The popup always
-calculates and displays the exact remaining time when opened.
+An offscreen document with a dedicated worker updates the badge once per second
+while the popup is closed. The timer itself remains exact because it uses
+persisted timestamps and a completion alarm. The popup also calculates and
+displays the exact remaining time when opened.
 
 ## Permissions and Privacy
 
@@ -153,6 +155,8 @@ The extension is designed to use only the permissions needed for its timer:
 
 - `storage` for the selected duration and timer state.
 - `alarms` for background completion handling.
+- `offscreen` for the hidden worker that updates the badge while the popup is
+  closed.
 
 It does not need host permissions or content scripts. It does not inspect,
 collect, or modify page content. No secrets should be included in the
