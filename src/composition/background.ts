@@ -13,6 +13,7 @@ import { createWebExtensionCompletionAlert } from '../adapters/alert/webextensio
 import { systemClock } from '../adapters/clock/system-clock';
 import { createWebExtensionLifecycle } from '../adapters/lifecycle/webextension-lifecycle';
 import { createWebExtensionMessaging } from '../adapters/messaging/webextension-messaging';
+import { createChromeOffscreen } from '../adapters/offscreen/chrome-offscreen';
 import { createWebExtensionStorage } from '../adapters/storage/webextension-storage';
 
 const storage = createWebExtensionStorage(browser);
@@ -22,6 +23,7 @@ const badge = {
   setText: (text: string): Promise<void> => browser.action.setBadgeText({ text }),
 };
 const completionAlert = createWebExtensionCompletionAlert(browser);
+const offscreen = createChromeOffscreen(browser);
 const lifecycle = createWebExtensionLifecycle(browser);
 const messaging = createWebExtensionMessaging(browser);
 
@@ -30,11 +32,13 @@ async function synchronize(
 ): Promise<void> {
   if (snapshot.state === TIMER_STATES.running && snapshot.endAtMs !== null) {
     await alarm.schedule(TIMER_ALARM_NAME, snapshot.endAtMs);
+    await offscreen.start(snapshot.endAtMs);
     await badge.setText(formatBadge(getRemainingMilliseconds(snapshot, systemClock.now())));
     return;
   }
 
   await alarm.clear(TIMER_ALARM_NAME);
+  await offscreen.stop();
   await badge.setText('');
 }
 
@@ -47,9 +51,21 @@ async function reconcileAndSynchronize(openAlert: boolean): Promise<void> {
   }
 }
 
-async function handleMessage(message: unknown): Promise<ExtensionResponse> {
+async function handleMessage(message: unknown): Promise<ExtensionResponse | undefined> {
   if (!isExtensionMessage(message)) {
     return { ok: false, message: 'Invalid timer message.' };
+  }
+
+  if (
+    message.type === MESSAGE_TYPES.startBadgeUpdates ||
+    message.type === MESSAGE_TYPES.stopBadgeUpdates
+  ) {
+    return undefined;
+  }
+
+  if (message.type === MESSAGE_TYPES.updateBadge) {
+    await handleBadgeUpdate(message.remainingMs);
+    return undefined;
   }
 
   try {
@@ -67,6 +83,17 @@ async function handleMessage(message: unknown): Promise<ExtensionResponse> {
       message: error instanceof Error ? error.message : 'The timer action failed.',
     };
   }
+}
+
+async function handleBadgeUpdate(remainingMs: number): Promise<void> {
+  const snapshot = await timerService.reconcile();
+
+  if (remainingMs <= 0 || snapshot.state !== TIMER_STATES.running) {
+    await synchronize(snapshot);
+    return;
+  }
+
+  await badge.setText(formatBadge(getRemainingMilliseconds(snapshot, systemClock.now())));
 }
 
 async function dispatchMessage(message: ExtensionMessage) {
@@ -100,6 +127,14 @@ async function dispatchMessage(message: ExtensionMessage) {
 
   if (message.type === MESSAGE_TYPES.restart) {
     return timerService.restart(message.durationMinutes);
+  }
+
+  if (
+    message.type === MESSAGE_TYPES.startBadgeUpdates ||
+    message.type === MESSAGE_TYPES.stopBadgeUpdates ||
+    message.type === MESSAGE_TYPES.updateBadge
+  ) {
+    return timerService.getSnapshot();
   }
 
   const exhaustiveMessage: never = message;
