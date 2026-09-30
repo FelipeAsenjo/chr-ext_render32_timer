@@ -109,7 +109,8 @@ Chrome APIs / UI
 - `src/manifests/` contains browser-specific manifest variants.
 - `test/` contains unit tests that do not require a browser.
 - `public/icons/` contains the source `chr-ext_render32-timer_icon.png` and
-  generated 16, 48, and 128 pixel PNG assets.
+  generated 16, 48, and 128 pixel PNG assets with lightly rounded canvas
+  corners and a white background.
 - `dist/` contains generated builds and must not be edited manually.
 
 The core must not import `chrome`, `browser`, DOM globals, Vite modules, or
@@ -143,6 +144,7 @@ The badge is visible only while the timer is running:
 - More than 60 seconds remaining: whole minutes with an `m` suffix, such as
   `44m`.
 - 60 seconds or less remaining: seconds with an `s` suffix, such as `15s`.
+- The badge background uses the icon's vivid red accent: `#E21D3F`.
 - Idle, paused, and completed states: no badge.
 
 An offscreen document with a dedicated worker updates the badge once per second

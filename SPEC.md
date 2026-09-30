@@ -119,6 +119,8 @@ The badge is shown only while the timer is `running`.
   example `15m`.
 - 60 seconds or less remaining: show seconds with an `s` suffix, for example
   `15s`.
+- The badge background uses the icon's vivid red palette (`#E21D3F`) with the
+  browser-provided badge text color.
 - `idle`, `paused`, and `completed`: remove the badge.
 
 When the popup is open, it should display the exact remaining time. When the
