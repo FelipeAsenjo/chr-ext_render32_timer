@@ -27,7 +27,7 @@ export function createBaseManifest(): ExtensionManifest {
   return {
     manifest_version: 3,
     name: 'render32_timer',
-    version: '0.1.0',
+    version: '0.6.0',
     description: 'Simple countdown timer',
     action: {
       default_popup: 'src/popup/popup.html',
