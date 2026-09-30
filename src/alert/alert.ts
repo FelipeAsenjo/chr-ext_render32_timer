@@ -14,7 +14,10 @@ import {
 
 const description = document.querySelector<HTMLParagraphElement>('#description');
 const restartPanel = document.querySelector<HTMLElement>('#restart-panel');
-const restartDuration = document.querySelector<HTMLSelectElement>('#restart-duration');
+const restartDurationDisplay = document.querySelector<HTMLButtonElement>(
+  '#restart-duration-display',
+);
+const restartDurationEditor = document.querySelector<HTMLInputElement>('#restart-duration-editor');
 const restartQuickAccess = document.querySelector<HTMLDivElement>('#restart-quick-access');
 const cancelButton = document.querySelector<HTMLButtonElement>('#cancel');
 const restartButton = document.querySelector<HTMLButtonElement>('#restart');
@@ -24,7 +27,8 @@ const status = document.querySelector<HTMLParagraphElement>('#status');
 if (
   !description ||
   !restartPanel ||
-  !restartDuration ||
+  !restartDurationDisplay ||
+  !restartDurationEditor ||
   !restartQuickAccess ||
   !cancelButton ||
   !restartButton ||
@@ -36,7 +40,8 @@ if (
 
 const descriptionElement = description;
 const restartPanelElement = restartPanel;
-const restartDurationElement = restartDuration;
+const restartDurationDisplayElement = restartDurationDisplay;
+const restartDurationEditorElement = restartDurationEditor;
 const restartQuickAccessElement = restartQuickAccess;
 const cancelButtonElement = cancelButton;
 const restartButtonElement = restartButton;
@@ -44,6 +49,7 @@ const confirmRestartButtonElement = confirmRestartButton;
 const statusElement = status;
 
 let selectedRestartMinutes = 45;
+let editingRestartDuration = false;
 let alarmContext: AudioContext | undefined;
 let alarmInterval: number | undefined;
 let alarmTimeout: number | undefined;
@@ -61,15 +67,6 @@ function showStatus(message: string, isError = false): void {
   statusElement.classList.toggle('error', isError);
 }
 
-function createDurationOptions(): void {
-  for (let minutes = MIN_DURATION_MINUTES; minutes <= MAX_DURATION_MINUTES; minutes += 1) {
-    const option = document.createElement('option');
-    option.value = String(minutes);
-    option.textContent = `${minutes} minutes`;
-    restartDurationElement.append(option);
-  }
-}
-
 function createQuickAccessButtons(): void {
   for (const minutes of QUICK_ACCESS_MINUTES) {
     const button = document.createElement('button');
@@ -82,7 +79,58 @@ function createQuickAccessButtons(): void {
 
 function setSelectedRestartMinutes(minutes: number): void {
   selectedRestartMinutes = minutes;
-  restartDurationElement.value = String(minutes);
+  restartDurationDisplayElement.textContent = `${minutes} minutes`;
+  restartDurationEditorElement.value = String(minutes);
+}
+
+function enterRestartDurationEditing(): void {
+  if (restartPanelElement.hidden === true) {
+    return;
+  }
+
+  editingRestartDuration = true;
+  restartDurationEditorElement.value = String(selectedRestartMinutes);
+  restartDurationDisplayElement.hidden = true;
+  restartDurationEditorElement.hidden = false;
+  restartDurationEditorElement.focus();
+  restartDurationEditorElement.select();
+}
+
+function cancelRestartDurationEditing(): void {
+  if (!editingRestartDuration) {
+    return;
+  }
+
+  editingRestartDuration = false;
+  restartDurationEditorElement.hidden = true;
+  restartDurationDisplayElement.hidden = false;
+  setSelectedRestartMinutes(selectedRestartMinutes);
+}
+
+function confirmRestartDurationEditing(): void {
+  if (!editingRestartDuration) {
+    return;
+  }
+
+  const durationMinutes = Number(restartDurationEditorElement.value);
+
+  if (
+    !Number.isInteger(durationMinutes) ||
+    durationMinutes < MIN_DURATION_MINUTES ||
+    durationMinutes > MAX_DURATION_MINUTES
+  ) {
+    showStatus(
+      `Enter a whole number from ${MIN_DURATION_MINUTES} to ${MAX_DURATION_MINUTES} minutes.`,
+      true,
+    );
+    restartDurationEditorElement.focus();
+    return;
+  }
+
+  editingRestartDuration = false;
+  restartDurationEditorElement.hidden = true;
+  restartDurationDisplayElement.hidden = false;
+  setSelectedRestartMinutes(durationMinutes);
 }
 
 function startTone(): void {
@@ -195,14 +243,32 @@ async function initialize(): Promise<void> {
   }
 }
 
-restartDurationElement.addEventListener('change', () => {
-  setSelectedRestartMinutes(Number(restartDurationElement.value));
+restartDurationDisplayElement.addEventListener('click', enterRestartDurationEditing);
+
+restartDurationEditorElement.addEventListener('blur', confirmRestartDurationEditing);
+
+restartDurationEditorElement.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    cancelRestartDurationEditing();
+    return;
+  }
+
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    confirmRestartDurationEditing();
+  }
 });
 
 restartQuickAccessElement.addEventListener('click', (event) => {
   const target = event.target;
 
   if (!(target instanceof HTMLButtonElement) || target.dataset.minutes === undefined) {
+    return;
+  }
+
+  if (editingRestartDuration) {
+    confirmRestartDurationEditing();
     return;
   }
 
@@ -227,6 +293,5 @@ confirmRestartButtonElement.addEventListener('click', () => {
 
 window.addEventListener('beforeunload', stopAlarm);
 
-createDurationOptions();
 createQuickAccessButtons();
 void initialize();

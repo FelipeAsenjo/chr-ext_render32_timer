@@ -10,7 +10,7 @@ body {
 }
 
 button,
-select {
+input {
   font: inherit;
 }
 
@@ -67,7 +67,7 @@ h1 {
   border-radius: 10px;
 }
 
-.restart-panel label {
+.restart-label {
   display: block;
   margin-bottom: 8px;
   color: #d9ddd8;
@@ -75,7 +75,8 @@ h1 {
   font-weight: 700;
 }
 
-select {
+.duration-display,
+.duration-editor {
   width: 100%;
   padding: 8px;
   color: #f4f0e8;
@@ -83,6 +84,20 @@ select {
   border: 1px solid #3a3f3e;
   border-radius: 7px;
   font-size: 12px;
+}
+
+.duration-display {
+  text-align: left;
+}
+
+input[type='number'] {
+  appearance: textfield;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
 }
 
 .quick-grid {

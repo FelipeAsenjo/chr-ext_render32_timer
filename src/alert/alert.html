@@ -14,8 +14,25 @@
       <p id="description" class="description">Your countdown is complete.</p>
 
       <section id="restart-panel" class="restart-panel" hidden>
-        <label for="restart-duration">Restart with</label>
-        <select id="restart-duration"></select>
+        <span class="restart-label">Restart with</span>
+        <button
+          id="restart-duration-display"
+          class="duration-display"
+          type="button"
+          aria-label="Edit restart duration"
+        >
+          45 minutes
+        </button>
+        <input
+          id="restart-duration-editor"
+          class="duration-editor"
+          type="number"
+          min="1"
+          max="1440"
+          inputmode="numeric"
+          aria-label="Restart duration in minutes"
+          hidden
+        />
         <div id="restart-quick-access" class="quick-grid"></div>
       </section>
 
