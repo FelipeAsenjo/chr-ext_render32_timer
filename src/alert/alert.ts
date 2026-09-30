@@ -48,6 +48,14 @@ let alarmContext: AudioContext | undefined;
 let alarmInterval: number | undefined;
 let alarmTimeout: number | undefined;
 
+function centerAlertWindow(): void {
+  const left = Math.max(0, (screen.availWidth - 420) / 2);
+  const top = Math.max(0, (screen.availHeight - 480) / 2);
+
+  window.moveTo(Math.round(left), Math.round(top));
+  window.focus();
+}
+
 function showStatus(message: string, isError = false): void {
   statusElement.textContent = message;
   statusElement.classList.toggle('error', isError);
@@ -171,6 +179,7 @@ async function restartCompletion(): Promise<void> {
 
 async function initialize(): Promise<void> {
   try {
+    centerAlertWindow();
     const snapshot = await send({ type: MESSAGE_TYPES.getSnapshot });
 
     if (snapshot.state !== 'completed') {
