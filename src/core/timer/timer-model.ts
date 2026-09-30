@@ -113,5 +113,5 @@ export function formatBadge(milliseconds: number): string {
     return `${Math.ceil(remainingMilliseconds / 1000)}s`;
   }
 
-  return Math.floor(remainingMilliseconds / MILLISECONDS_PER_MINUTE).toString();
+  return `${Math.floor(remainingMilliseconds / MILLISECONDS_PER_MINUTE)}m`;
 }

@@ -165,7 +165,7 @@ describe('timer service', () => {
   it('formats countdown and badge values at the 60-second boundary', () => {
     expect(formatCountdown(61_000)).toBe('01:01');
     expect(formatCountdown(60_000)).toBe('01:00');
-    expect(formatBadge(61_000)).toBe('1');
+    expect(formatBadge(61_000)).toBe('1m');
     expect(formatBadge(60_000)).toBe('60s');
     expect(formatBadge(15_100)).toBe('16s');
     expect(formatBadge(0)).toBe('');
