@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       input: {
         alert: resolve(import.meta.dirname, 'src/alert/alert.html'),
+        offscreen: resolve(import.meta.dirname, 'src/offscreen/offscreen.html'),
       },
     },
   },

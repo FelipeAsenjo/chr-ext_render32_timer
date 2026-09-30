@@ -38,7 +38,7 @@ export function createBaseManifest(): ExtensionManifest {
       service_worker: 'src/composition/background.ts',
       type: 'module',
     },
-    permissions: ['storage', 'alarms'],
+    permissions: ['storage', 'alarms', 'offscreen'],
     host_permissions: [],
     icons: {
       16: 'icons/icon-16.svg',

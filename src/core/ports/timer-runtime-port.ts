@@ -13,3 +13,8 @@ export interface BadgePort {
 export interface CompletionAlertPort {
   open(): Promise<void>;
 }
+
+export interface OffscreenPort {
+  start(endAtMs: number): Promise<void>;
+  stop(): Promise<void>;
+}
